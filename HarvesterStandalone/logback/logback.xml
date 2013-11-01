@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+	<!-- sends logs to logback-beagle -->
+	<!-- <consolePlugin /> -->
+
+	<property file="configure.properties" />
+	<!-- <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss" /> -->
+
+	<!-- <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
+		<encoder> <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n 
+		</pattern> </encoder> </appender> -->
+
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>${log.file.path}${log.file.name}.log</file>
+		<append>true</append>
+		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+			by default -->
+		<!-- <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy"> 
+			<maxFileSize>5MB</maxFileSize> </triggeringPolicy> -->
+
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %msg%n
+			</pattern>
+		</encoder>
+
+		<!-- <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder"> 
+			<layout class="ch.qos.logback.classic.log4j.XMLLayout"> <locationInfo>true</locationInfo> 
+			</layout> </encoder> -->
+
+	</appender>
+	<root level="DEBUG">
+		<!-- <appender-ref ref="STDOUT" /> -->
+		<appender-ref ref="FILE" />
+	</root>
+
+</configuration>
