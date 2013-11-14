@@ -69,6 +69,7 @@ public class HarvestAllProcess {
 		logString.append(" " + "ALL");
 
 		records = repos.listRecords(metadataPrefix);
+		
 
 		int counter = 0;
 		// records.moveNext();
