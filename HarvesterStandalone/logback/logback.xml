@@ -19,7 +19,7 @@
 			<maxFileSize>5MB</maxFileSize> </triggeringPolicy> -->
 
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %msg%n
+			<pattern>%d{YYYY-MM-dd.HH:mm:ss.SSS} %msg%n
 			</pattern>
 		</encoder>
 
