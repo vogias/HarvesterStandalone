@@ -69,12 +69,12 @@ public class HarvestAllProcess {
 		logString.append(" " + "ALL");
 
 		records = repos.listRecords(metadataPrefix);
-		
 
 		int counter = 0;
+		int deletedRecords = 0;
 		// records.moveNext();
 		while (records.moreItems()) {
-			counter++;
+			
 			OAIRecord item = records.getCurrentItem();
 
 			/*
@@ -85,6 +85,7 @@ public class HarvestAllProcess {
 				Element metadata = item.getMetadata();
 				if (metadata != null) {
 					// System.out.println(item.getIdentifier());
+					counter++;
 					Record rec = new Record();
 					rec.setOaiRecord(item);
 					rec.setMetadata(item.getMetadata());
@@ -97,15 +98,20 @@ public class HarvestAllProcess {
 
 				} else {
 					System.out.println(item.getIdentifier() + " deleted");
+					deletedRecords++;
+					
 				}
 			} else {
 				System.out.println(item.getIdentifier() + " deleted");
+				deletedRecords++;
+				
 			}
 			records.moveNext();
 		}
 		// System.out.println(counter);
 		System.out.println("Records harvested:" + counter);
 		logString.append(" " + counter);
+		logString.append(" " + deletedRecords);
 		slf4jLogger.info(logString.toString());
 	}
 
