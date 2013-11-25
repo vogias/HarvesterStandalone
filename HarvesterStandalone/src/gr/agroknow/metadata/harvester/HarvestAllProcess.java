@@ -98,14 +98,14 @@ public class HarvestAllProcess {
 									+ "/" + identifier + ".xml");
 
 				} else {
-					System.out.println(item.getIdentifier() + " deleted");
+					
 					logString.append(" " + "DELETED");
 					logString.append(" " + item.getIdentifier());
 					deletedRecords++;
 
 				}
 			} else {
-				System.out.println(item.getIdentifier() + " deleted");
+				
 				logString.append(" " + "DELETED");
 				logString.append(" " + item.getIdentifier());
 				deletedRecords++;
