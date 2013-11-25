@@ -1,8 +1,10 @@
 package gr.agroknow.metadata.harvester;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Properties;
 
 import org.ariadne.util.IOUtilsv2;
 import org.ariadne.util.OaiUtils;
@@ -39,8 +41,6 @@ public class HarvestAllProcess {
 			String metadataPrefix) throws OAIException, IOException,
 			JDOMException {
 
-		StringBuffer logString = new StringBuffer();
-
 		OAIRepository repos = new OAIRepository();
 		File file = new File(folderName);
 		String identifier = "";
@@ -58,23 +58,18 @@ public class HarvestAllProcess {
 		System.out
 				.println("Harvesting repository:" + repos.getRepositoryName());
 
-		logString.append(file.getName());
-		System.out.println("Folder:" + folderName);
-		logString.append(" " + folderName);
-		System.out.println("Target URL:" + target);
-		logString.append(" " + target);
-		System.out.println("Metadata prefix:" + metadataPrefix);
-		logString.append(" " + metadataPrefix);
-		System.out.println("Repository set:ALL");
-		logString.append(" " + "ALL");
-
 		records = repos.listRecords(metadataPrefix);
 
 		int counter = 0;
 		int deletedRecords = 0;
 		// records.moveNext();
 		while (records.moreItems()) {
-			
+			StringBuffer logString = new StringBuffer();
+
+			logString.append(file.getName());
+			logString.append(" " + metadataPrefix);
+			logString.append(" " + "ALL");
+
 			OAIRecord item = records.getCurrentItem();
 
 			/*
@@ -83,6 +78,9 @@ public class HarvestAllProcess {
 			 */
 			if (!item.deleted()) {
 				Element metadata = item.getMetadata();
+
+				logString.append(" " + "NEW");
+
 				if (metadata != null) {
 					// System.out.println(item.getIdentifier());
 					counter++;
@@ -90,6 +88,9 @@ public class HarvestAllProcess {
 					rec.setOaiRecord(item);
 					rec.setMetadata(item.getMetadata());
 					rec.setOaiIdentifier(item.getIdentifier());
+
+					logString.append(" " + item.getIdentifier());
+
 					identifier = item.getIdentifier().replaceAll(":", "_");
 					identifier = identifier.replaceAll("/", ".");
 					IOUtilsv2.writeStringToFileInEncodingUTF8(
@@ -98,21 +99,24 @@ public class HarvestAllProcess {
 
 				} else {
 					System.out.println(item.getIdentifier() + " deleted");
+					logString.append(" " + "DELETED");
+					logString.append(" " + item.getIdentifier());
 					deletedRecords++;
-					
+
 				}
 			} else {
 				System.out.println(item.getIdentifier() + " deleted");
+				logString.append(" " + "DELETED");
+				logString.append(" " + item.getIdentifier());
 				deletedRecords++;
-				
+
 			}
+			slf4jLogger.info(logString.toString());
 			records.moveNext();
 		}
 		// System.out.println(counter);
 		System.out.println("Records harvested:" + counter);
-		logString.append(" " + counter);
-		logString.append(" " + deletedRecords);
-		slf4jLogger.info(logString.toString());
+
 	}
 
 }
