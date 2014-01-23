@@ -25,21 +25,21 @@ public class HarvestAllProcess {
 	public static void main(String[] args) throws OAIException, IOException,
 			JDOMException {
 
-		if (args.length != 3) {
+		if (args.length != 4) {
 			System.err
-					.println("Usage: java HarvestProcess param1(target) param2(foldername) param3(metadataPrefix), e.g");
+					.println("Usage: java HarvestProcess param1(target) param2(foldername) param3(metadataPrefix) param4(set), e.g");
 			System.exit(1);
 		}
 		// else{ throw new IOException("ERRROR");}
 
-		listRecords(args[0], args[1], args[2]);
+		listRecords(args[0], args[1], args[2], args[3]);
 
 		// listRecords("http://jme.collections.natural-europe.eu/oai/","C:/testSet","oai_dc","");
 	}
 
 	public static void listRecords(String target, String folderName,
-			String metadataPrefix) throws OAIException, IOException,
-			JDOMException {
+			String metadataPrefix, String set) throws OAIException,
+			IOException, JDOMException {
 
 		OAIRepository repos = new OAIRepository();
 		File file = new File(folderName);
@@ -58,7 +58,16 @@ public class HarvestAllProcess {
 		System.out
 				.println("Harvesting repository:" + repos.getRepositoryName());
 
-		records = repos.listRecords(metadataPrefix);
+		String from = "2000-12-31";
+		String to = "9999-12-31";
+		if (set.equals(""))
+			records = repos.listRecords(metadataPrefix, to, from);
+		else
+			records = repos.listRecords(metadataPrefix, to, from, set);
+
+		
+		
+		//records = repos.listRecords(metadataPrefix);
 
 		int counter = 0;
 		int deletedRecords = 0;
@@ -98,14 +107,14 @@ public class HarvestAllProcess {
 									+ "/" + identifier + ".xml");
 
 				} else {
-					
+
 					logString.append(" " + "DELETED");
 					logString.append(" " + item.getIdentifier());
 					deletedRecords++;
 
 				}
 			} else {
-				
+
 				logString.append(" " + "DELETED");
 				logString.append(" " + item.getIdentifier());
 				deletedRecords++;
