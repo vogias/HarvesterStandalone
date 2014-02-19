@@ -65,8 +65,10 @@ public class HarvestAllProcess {
 
 		if (incremental.equalsIgnoreCase("true")) {
 			from = props.getProperty(Constants.lhDate);
+			System.out.println("Last harvesting date:" + from);
 		} else if (incremental.equalsIgnoreCase("false")) {
 			from = "1900-12-31";
+			System.out.println("Fallback last harvesting date:" + from);
 		} else {
 			System.err.println("Wrong harvester.incremental value");
 			System.exit(-1);
@@ -74,7 +76,7 @@ public class HarvestAllProcess {
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String date = dateFormat.format(new Date());
-		
+
 		System.out.println("Harvesting date:" + date);
 		System.out
 				.println("Harvesting repository:" + repos.getRepositoryName());
