@@ -3,6 +3,8 @@ package gr.agroknow.metadata.harvester;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
@@ -52,22 +54,37 @@ public class HarvestAllProcess {
 
 		// OAIRecordList records =
 		// repos.listRecords("ese","9999-12-31","2000-12-31","");
+		Properties props = new Properties();
+		props.load(new FileInputStream("configure.properties"));
 
-		System.out.println("Harvesting date:" + new Date().toString());
+		String incremental = props.getProperty(Constants.incremental);
+		// String from = "2000-12-31";
 
+		String from = "";
+		String to = "9999-12-31";
+
+		if (incremental.equalsIgnoreCase("true")) {
+			from = props.getProperty(Constants.lhDate);
+		} else if (incremental.equalsIgnoreCase("false")) {
+			from = "1900-12-31";
+		} else {
+			System.err.println("Wrong harvester.incremental value");
+			System.exit(-1);
+		}
+
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String date = dateFormat.format(new Date());
+		
+		System.out.println("Harvesting date:" + date);
 		System.out
 				.println("Harvesting repository:" + repos.getRepositoryName());
 
-		String from = "2000-12-31";
-		String to = "9999-12-31";
 		if (set.equals(""))
 			records = repos.listRecords(metadataPrefix, to, from);
 		else
 			records = repos.listRecords(metadataPrefix, to, from, set);
 
-		
-		
-		//records = repos.listRecords(metadataPrefix);
+		// records = repos.listRecords(metadataPrefix);
 
 		int counter = 0;
 		int deletedRecords = 0;
