@@ -49,6 +49,8 @@ public class HarvestAllProcess {
 		file.mkdirs();
 
 		repos.setBaseURL(target);
+		
+		System.out.println("Max retry limit:" + repos.getRetryLimit());
 
 		OAIRecordList records;
 
@@ -121,6 +123,7 @@ public class HarvestAllProcess {
 
 					identifier = item.getIdentifier().replaceAll(":", "_");
 					identifier = identifier.replaceAll("/", ".");
+					identifier = identifier.replaceAll("\\?", ".");
 					IOUtilsv2.writeStringToFileInEncodingUTF8(
 							OaiUtils.parseLom2Xmlstring(metadata), folderName
 									+ "/" + identifier + ".xml");
