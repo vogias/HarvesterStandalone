@@ -3,6 +3,7 @@ package gr.agroknow.metadata.harvester;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -24,7 +25,7 @@ public class HarvestAllProcess {
 			.getLogger(HarvestAllProcess.class);
 
 	public static void main(String[] args) throws OAIException, IOException,
-			JDOMException {
+			JDOMException, ParseException {
 
 		if (args.length != 4) {
 			System.err
@@ -40,54 +41,64 @@ public class HarvestAllProcess {
 
 	public static void listRecords(String target, String folderName,
 			String metadataPrefix, String set) throws OAIException,
-			IOException, JDOMException {
+			IOException, JDOMException, ParseException {
 		OAIRepository repos = null;
 		try {
+			Properties props = new Properties();
+			props.load(new FileInputStream("configure.properties"));
+
 			repos = new OAIRepository();
+			repos.setBaseURL(target);
 
 			File file = new File(folderName);
 			String identifier = "";
 			file.mkdirs();
 
-			repos.setBaseURL(target);
+			String granularity = repos.getGranularity();
 
+			System.out.println("Repository granularity:" + granularity);
+
+			SimpleDateFormat dateFormat = null;
+
+			dateFormat = new SimpleDateFormat(
+					props.getProperty(Constants.granularity));
+
+			System.out.println("Harvester Dateformat:"
+					+ dateFormat.toLocalizedPattern());
 			System.out.println("Max retry limit:" + repos.getRetryLimit());
 
 			OAIRecordList records;
 
-			// OAIRecordList records =
-			// repos.listRecords("ese","9999-12-31","2000-12-31","");
-			Properties props = new Properties();
-			props.load(new FileInputStream("configure.properties"));
-
 			String incremental = props.getProperty(Constants.incremental);
-			// String from = "2000-12-31";
 
 			String from = "";
-			String to = "9999-12-31";
+			String to = "9999-12-30";
+			to = dateFormat.format(dateFormat.parse(to));
+
+			String lhDate = props.getProperty(Constants.lhDate);
+			lhDate = dateFormat.format(dateFormat.parse(lhDate));
 
 			if (incremental.equalsIgnoreCase("true")) {
-				from = props.getProperty(Constants.lhDate);
+				from = lhDate;
+
 				System.out.println("Last harvesting date:" + from);
 			} else if (incremental.equalsIgnoreCase("false")) {
-				from = "1900-12-31";
-				System.out.println("Fallback last harvesting date:" + from);
+				from = "";
+				// System.out.println("Fallback last harvesting date:" + from);
 			} else {
 				System.err.println("Wrong harvester.incremental value");
 				System.exit(-1);
 			}
 
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String date = dateFormat.format(new Date());
 
 			System.out.println("Harvesting date:" + date);
 			System.out.println("Harvesting repository:"
 					+ repos.getRepositoryName());
 
-			System.out.println("Granularity:"+repos.getGranularity());
 			if (set.equals("")) {
 
-				if (from.equals("1900-12-31"))
+				if (from.equals(""))
 					records = repos.listRecords(metadataPrefix);
 				else
 					records = repos.listRecords(metadataPrefix, to, from);
