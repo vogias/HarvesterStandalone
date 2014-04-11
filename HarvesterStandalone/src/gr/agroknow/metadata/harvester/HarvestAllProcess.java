@@ -71,7 +71,9 @@ public class HarvestAllProcess {
 
 			String incremental = props.getProperty(Constants.incremental);
 
+			String fromBase = "1900-01-01";
 			String from = "";
+
 			String to = "9999-12-30";
 			to = dateFormat.format(dateFormat.parse(to));
 
@@ -83,7 +85,7 @@ public class HarvestAllProcess {
 
 				System.out.println("Last harvesting date:" + from);
 			} else if (incremental.equalsIgnoreCase("false")) {
-				from = "";
+				from = dateFormat.format(dateFormat.parse(fromBase));
 				// System.out.println("Fallback last harvesting date:" + from);
 			} else {
 				System.err.println("Wrong harvester.incremental value");
@@ -98,7 +100,7 @@ public class HarvestAllProcess {
 
 			if (set.equals("")) {
 
-				if (from.equals(""))
+				if (from.equals(dateFormat.format(dateFormat.parse(fromBase))))
 					records = repos.listRecords(metadataPrefix);
 				else
 					records = repos.listRecords(metadataPrefix, to, from);
@@ -106,6 +108,7 @@ public class HarvestAllProcess {
 
 			else {
 				System.out.println("Set:" + set);
+				System.out.println("From:" + from);
 				records = repos.listRecords(metadataPrefix, to, from, set);
 			}
 
