@@ -84,6 +84,7 @@ public class HarvestAllProcess {
 			System.out.println("Harvesting repository:"
 					+ repos.getRepositoryName());
 
+			System.out.println("Granularity:"+repos.getGranularity());
 			if (set.equals("")) {
 
 				if (from.equals("1900-12-31"))
