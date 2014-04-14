@@ -134,10 +134,11 @@ public class HarvestAllProcess {
 				if (!item.deleted()) {
 					Element metadata = item.getMetadata();
 
-					logString.append(" " + "NEW");
+					
 
 					if (metadata != null) {
 						// System.out.println(item.getIdentifier());
+						logString.append(" " + "NEW");
 						counter++;
 						Record rec = new Record();
 						rec.setOaiRecord(item);
@@ -149,6 +150,12 @@ public class HarvestAllProcess {
 						identifier = item.getIdentifier().replaceAll(":", "_");
 						identifier = identifier.replaceAll("/", ".");
 						identifier = identifier.replaceAll("\\?", ".");
+						
+						// File fileTest =new File(folderName + "/" + identifier
+						// + ".xml");
+						// if(fileTest.exists())
+						// System.out.println("File:"+fileTest.getName()+" exists.");
+						
 						IOUtilsv2.writeStringToFileInEncodingUTF8(
 								OaiUtils.parseLom2Xmlstring(metadata),
 								folderName + "/" + identifier + ".xml");
