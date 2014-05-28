@@ -3,6 +3,8 @@ package gr.agroknow.metadata.harvester;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,6 +51,12 @@ public class HarvestAllProcess {
 
 			repos = new OAIRepository();
 			repos.setBaseURL(target);
+
+			URL url = new URL(target);
+			InetAddress address = InetAddress.getByName(url.getHost());
+			String temp = address.toString();
+			String IP = temp.substring(temp.indexOf("/") + 1, temp.length());
+			System.out.println("OAI-PMH Target IP:" + IP);
 
 			File file = new File(folderName);
 			String identifier = "";
@@ -122,6 +130,7 @@ public class HarvestAllProcess {
 				StringBuffer logString = new StringBuffer();
 
 				logString.append(file.getName());
+				logString.append(" " + IP);
 				logString.append(" " + metadataPrefix);
 				logString.append(" " + "ALL");
 
@@ -133,8 +142,6 @@ public class HarvestAllProcess {
 				 */
 				if (!item.deleted()) {
 					Element metadata = item.getMetadata();
-
-					
 
 					if (metadata != null) {
 						// System.out.println(item.getIdentifier());
@@ -150,12 +157,12 @@ public class HarvestAllProcess {
 						identifier = item.getIdentifier().replaceAll(":", "_");
 						identifier = identifier.replaceAll("/", ".");
 						identifier = identifier.replaceAll("\\?", ".");
-						
+
 						// File fileTest =new File(folderName + "/" + identifier
 						// + ".xml");
 						// if(fileTest.exists())
 						// System.out.println("File:"+fileTest.getName()+" exists.");
-						
+
 						IOUtilsv2.writeStringToFileInEncodingUTF8(
 								OaiUtils.parseLom2Xmlstring(metadata),
 								folderName + "/" + identifier + ".xml");
