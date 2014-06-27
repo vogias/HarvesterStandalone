@@ -1,4 +1,4 @@
-package gr.agroknow.metadata.harvester;
+package grnet.metadata.harvester;
 
 import java.io.File;
 import java.io.FileInputStream;
