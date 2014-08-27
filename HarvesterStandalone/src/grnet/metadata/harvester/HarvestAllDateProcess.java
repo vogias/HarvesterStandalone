@@ -22,7 +22,7 @@ import uiuc.oai.OAIRepository;
 
 /**
  * 
- * @author nimas
+ * @author vogias
  */
 public class HarvestAllDateProcess {
 

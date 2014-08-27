@@ -17,6 +17,8 @@ import org.jdom.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.core.util.FileUtil;
+
 import uiuc.oai.OAIException;
 import uiuc.oai.OAIRecord;
 import uiuc.oai.OAIRecordList;
@@ -125,6 +127,8 @@ public class HarvestAllProcess {
 			int counter = 0;
 			int deletedRecords = 0;
 			// records.moveNext();
+
+			
 			while (records.moreItems()) {
 
 				StringBuffer logString = new StringBuffer();
@@ -145,14 +149,14 @@ public class HarvestAllProcess {
 
 					if (metadata != null) {
 						// System.out.println(item.getIdentifier());
-						logString.append(" " + "NEW");
+						// logString.append(" " + "NEW");
 						counter++;
 						Record rec = new Record();
 						rec.setOaiRecord(item);
 						rec.setMetadata(item.getMetadata());
 						rec.setOaiIdentifier(item.getIdentifier());
 
-						logString.append(" " + item.getIdentifier());
+						// logString.append(" " + item.getIdentifier());
 
 						identifier = item.getIdentifier().replaceAll(":", "_");
 						identifier = identifier.replaceAll("/", ".");
@@ -163,6 +167,26 @@ public class HarvestAllProcess {
 						// if(fileTest.exists())
 						// System.out.println("File:"+fileTest.getName()+" exists.");
 
+						File mtdt = new File(folderName + "/" + identifier
+								+ ".xml");
+
+						if (mtdt.exists()) {
+							int fileContent = IOUtilsv2
+									.readStringFromFile(mtdt).hashCode();
+
+							int text = OaiUtils.parseLom2Xmlstring(metadata)
+									.hashCode();
+
+							if (fileContent != text)
+								logString.append(" " + "UPDATED");
+							else
+								logString.append(" " + "UNCHANGED");
+						}
+
+						else
+							logString.append(" " + "NEW");
+
+						logString.append(" " + item.getIdentifier());
 						IOUtilsv2.writeStringToFileInEncodingUTF8(
 								OaiUtils.parseLom2Xmlstring(metadata),
 								folderName + "/" + identifier + ".xml");
