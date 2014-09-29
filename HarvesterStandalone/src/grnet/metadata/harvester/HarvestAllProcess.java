@@ -172,7 +172,6 @@ public class HarvestAllProcess {
 				records = repos.listRecords(metadataPrefix, to, from, set);
 			}
 
-			
 
 			/*String identifier = "";
 
@@ -200,8 +199,6 @@ public class HarvestAllProcess {
 				logString.append(" " + "ALL");
 */
 				OAIRecord item = records.getCurrentItem();
-				
-				
 				
 				Worker worker=new Worker(file.getName(), IP, metadataPrefix, item, slf4jLogger, this, folderName);
 				executor.execute(worker);
