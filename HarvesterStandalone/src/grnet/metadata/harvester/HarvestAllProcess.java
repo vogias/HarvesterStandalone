@@ -3,7 +3,6 @@ package grnet.metadata.harvester;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream.GetField;
 import java.net.InetAddress;
 import java.net.URL;
 import java.text.ParseException;
@@ -14,9 +13,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.ariadne.util.IOUtilsv2;
-import org.ariadne.util.OaiUtils;
-import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,8 +167,7 @@ public class HarvestAllProcess {
 				System.out.println("From:" + from);
 				records = repos.listRecords(metadataPrefix, to, from, set);
 			}
-
-
+			
 			/*String identifier = "";
 
 			int counter = 0;
@@ -189,6 +184,9 @@ public class HarvestAllProcess {
 			ExecutorService executor = Executors
 					.newFixedThreadPool(threadPoolSize);
 			long start = System.currentTimeMillis();
+			
+			
+			
 			while (records.moreItems()) {
 
 				/*StringBuffer logString = new StringBuffer();
@@ -197,7 +195,10 @@ public class HarvestAllProcess {
 				logString.append(" " + IP);
 				logString.append(" " + metadataPrefix);
 				logString.append(" " + "ALL");
+				
+				
 */
+				
 				OAIRecord item = records.getCurrentItem();
 				
 				Worker worker=new Worker(file.getName(), IP, metadataPrefix, item, slf4jLogger, this, folderName);
