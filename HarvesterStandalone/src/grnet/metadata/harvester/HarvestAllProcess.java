@@ -293,11 +293,13 @@ public class HarvestAllProcess {
 			long end = System.currentTimeMillis();
 			long diff = end - start;
 
+			
+			System.out.println("=============Harvesting Statistics=============");
 			System.out.println("Records harvested:" + getCounter());
 			System.out.println("New Records:" + getNew());
-			System.out.println("Deleted Records :" + getDeleted());
-			System.out.println("Updated Records :" + getUpdated());
-			System.out.println("Unchanged Records :" + getUnchanged());
-			System.out.println("Duration :" +diff+" ms");
+			System.out.println("Deleted Records:" + getDeleted());
+			System.out.println("Updated Records:" + getUpdated());
+			System.out.println("Unchanged Records:" + getUnchanged());
+			System.out.println("Duration:" +diff+" ms");
   }
 }
