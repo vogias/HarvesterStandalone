@@ -3,12 +3,16 @@ package grnet.metadata.harvester;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream.GetField;
 import java.net.InetAddress;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.ariadne.util.IOUtilsv2;
 import org.ariadne.util.OaiUtils;
@@ -16,8 +20,6 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.core.util.FileUtil;
 
 import uiuc.oai.OAIException;
 import uiuc.oai.OAIRecord;
@@ -27,9 +29,14 @@ import uiuc.oai.OAIRepository;
 public class HarvestAllProcess {
 	private static final Logger slf4jLogger = LoggerFactory
 			.getLogger(HarvestAllProcess.class);
+	private int counter = 0;
+	private int deleted = 0;
+	private int updated = 0;
+	private int newRecords = 0;
+	private int unchanged = 0;
 
 	public static void main(String[] args) throws OAIException, IOException,
-			JDOMException, ParseException {
+			JDOMException, ParseException, InterruptedException {
 
 		if (args.length != 4) {
 			System.err
@@ -38,16 +45,59 @@ public class HarvestAllProcess {
 		}
 		// else{ throw new IOException("ERRROR");}
 
-		listRecords(args[0], args[1], args[2], args[3]);
+		HarvestAllProcess allProcess=new HarvestAllProcess();
+		allProcess.listRecords(args[0], args[1], args[2], args[3]);
+		
+	//	listRecords(args[0], args[1], args[2], args[3]);
 
 		// listRecords("http://jme.collections.natural-europe.eu/oai/","C:/testSet","oai_dc","");
 	}
 
-	public static void listRecords(String target, String folderName,
+	public synchronized void raiseCounter() {
+		counter++;
+	}
+
+	public synchronized void raiseDeleted() {
+		deleted++;
+	}
+
+	public synchronized void raiseNew() {
+		newRecords++;
+	}
+
+	public synchronized void raiseUpdated() {
+		updated++;
+	}
+
+	public synchronized void raiseUnchanged() {
+		unchanged++;
+	}
+
+	public synchronized int getCounter() {
+		return counter;
+	}
+
+	public synchronized int getUnchanged() {
+		return unchanged;
+	}
+
+	public synchronized int getNew() {
+		return newRecords;
+	}
+
+	public synchronized int getUpdated() {
+		return updated;
+	}
+
+	public synchronized int getDeleted() {
+		return deleted;
+	}
+
+	public void listRecords(String target, String folderName,
 			String metadataPrefix, String set) throws OAIException,
-			IOException, JDOMException, ParseException {
+			IOException, JDOMException, ParseException, InterruptedException {
 		OAIRepository repos = null;
-		try {
+		//try {
 			Properties props = new Properties();
 			props.load(new FileInputStream("configure.properties"));
 
@@ -61,7 +111,7 @@ public class HarvestAllProcess {
 			System.out.println("OAI-PMH Target IP:" + IP);
 
 			File file = new File(folderName);
-			String identifier = "";
+
 			file.mkdirs();
 
 			String granularity = repos.getGranularity();
@@ -122,29 +172,46 @@ public class HarvestAllProcess {
 				records = repos.listRecords(metadataPrefix, to, from, set);
 			}
 
-			// records = repos.listRecords(metadataPrefix);
+			
+
+			/*String identifier = "";
 
 			int counter = 0;
-			int deletedRecords = 0;
-			// records.moveNext();
-
+			int deletedRecords = 0;*/
 			
+
+			int threadPoolSize = 1;
+			threadPoolSize = Integer.parseInt(props
+					.getProperty(Constants.threads));
+			int availableProcessors = Runtime.getRuntime()
+					.availableProcessors();
+			System.out.println("Available cores:" + availableProcessors);
+			System.out.println("Thread Pool size:" + threadPoolSize);
+			ExecutorService executor = Executors
+					.newFixedThreadPool(threadPoolSize);
+			long start = System.currentTimeMillis();
 			while (records.moreItems()) {
 
-				StringBuffer logString = new StringBuffer();
+				/*StringBuffer logString = new StringBuffer();
 
 				logString.append(file.getName());
 				logString.append(" " + IP);
 				logString.append(" " + metadataPrefix);
 				logString.append(" " + "ALL");
-
+*/
 				OAIRecord item = records.getCurrentItem();
+				
+				
+				
+				Worker worker=new Worker(file.getName(), IP, metadataPrefix, item, slf4jLogger, this, folderName);
+				executor.execute(worker);
+				
 
 				/*
 				 * get the lom metadata : item.getMetadata(); this return a Node
 				 * which contains the lom metadata.
 				 */
-				if (!item.deleted()) {
+		/*		if (!item.deleted()) {
 					Element metadata = item.getMetadata();
 
 					if (metadata != null) {
@@ -207,16 +274,32 @@ public class HarvestAllProcess {
 				}
 				slf4jLogger.info(logString.toString());
 				records.moveNext();
-			}
+			}*/
+				records.moveNext();
 			// System.out.println(counter);
-			System.out.println("Records harvested:" + counter);
+		/*	System.out.println("Records harvested:" + counter);
+			System.out.println("New Records:" + getd);
+			System.out.println("Deleted Records :" + counter);
 		} catch (OAIException ex) {
 			System.err
 					.println("Harvesting from "
 							+ repos.getRepositoryName()
 							+ " did not complete because of a harvesting error, the error was : "
 							+ ex.getMessage());
-		}
+		}*/
 
 	}
+			executor.shutdown();
+
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			long end = System.currentTimeMillis();
+			long diff = end - start;
+
+			System.out.println("Records harvested:" + getCounter());
+			System.out.println("New Records:" + getNew());
+			System.out.println("Deleted Records :" + getDeleted());
+			System.out.println("Updated Records :" + getUpdated());
+			System.out.println("Unchanged Records :" + getUnchanged());
+			System.out.println("Duration :" +diff+" ms");
+  }
 }
