@@ -130,7 +130,7 @@ public class HarvestAllProcess {
 			String fromBase = "1900-01-01";
 			String from = "";
 
-			String to = "9999-12-30";
+			String to = props.getProperty(Constants.to);
 			to = dateFormat.format(dateFormat.parse(to));
 
 			String lhDate = props.getProperty(Constants.lhDate);
