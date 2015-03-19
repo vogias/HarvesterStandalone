@@ -11,6 +11,10 @@ import org.ariadne.util.OaiUtils;
 import org.jdom.Element;
 import org.slf4j.Logger;
 
+import com.rabbitmq.client.Channel;
+import com.rabbitmq.client.Connection;
+import com.rabbitmq.client.ConnectionFactory;
+
 import uiuc.oai.OAIException;
 import uiuc.oai.OAIRecord;
 
@@ -24,10 +28,12 @@ public class Worker implements Runnable {
 	OAIRecord item;
 	Logger slf4jLogger;
 	HarvestAllProcess allProcess;
+	ConnectionFactory factory;
+	String queue;
 
 	public Worker(String name, String IP, String metadataPrefix,
 			OAIRecord item, Logger slf4jLogger, HarvestAllProcess allProcess,
-			String folderName) {
+			String folderName, ConnectionFactory factory, String queueName) {
 
 		this.name = name;
 		this.IP = IP;
@@ -36,6 +42,8 @@ public class Worker implements Runnable {
 		this.slf4jLogger = slf4jLogger;
 		this.folderName = folderName;
 		this.allProcess = allProcess;
+		this.factory = factory;
+		this.queue = queueName;
 	}
 
 	@Override
@@ -129,13 +137,32 @@ public class Worker implements Runnable {
 
 			}
 			slf4jLogger.info(logString.toString());
-			// records.moveNext();
+
+			// sending to message queue
+
+			
+			
+			Connection connection = this.factory.newConnection();
+			Channel channel = connection.createChannel();
+			channel.queueDeclare(this.queue, false, false, false, null);
+
+			channel.basicPublish("", this.queue, null, logString.toString()
+					.getBytes());
+			System.out.println(" Sent '" + logString.toString()
+					+ "' to message queue server at:"
+					+ connection.getAddress().getHostAddress());
+			channel.close();
+			connection.close();
+
 		} catch (OAIException e1) {
 			System.err
 					.println("Harvesting from "
 							+ name
 							+ " did not complete because of a harvesting error, the error was : "
 							+ e1.getMessage());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
