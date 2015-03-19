@@ -148,9 +148,11 @@ public class Worker implements Runnable {
 
 			channel.basicPublish("", this.queue, null, logString.toString()
 					.getBytes());
-			System.out.println(" Sent '" + logString.toString()
-					+ "' to message queue server at:"
-					+ connection.getAddress().getHostAddress());
+			/*
+			 * System.out.println(" Sent '" + logString.toString() +
+			 * "' to message queue server at:" +
+			 * connection.getAddress().getHostAddress());
+			 */
 			channel.close();
 			connection.close();
 
