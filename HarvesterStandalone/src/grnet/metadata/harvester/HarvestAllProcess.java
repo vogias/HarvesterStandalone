@@ -174,12 +174,13 @@ public class HarvestAllProcess {
 		System.out.println("Available cores:" + availableProcessors);
 		System.out.println("Thread Pool size:" + threadPoolSize);
 		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-		long start = System.currentTimeMillis();
-
+	
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(props.getProperty(Constants.queueHost));
 		factory.setUsername(props.getProperty(Constants.queueUser));
 		factory.setPassword(props.getProperty(Constants.queuePass));
+		
+		long start = System.currentTimeMillis();
 
 		while (records.moreItems()) {
 
