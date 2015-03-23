@@ -70,27 +70,20 @@ public class Worker implements Runnable {
 				metadata = item.getMetadata();
 
 				if (metadata != null) {
-					// System.out.println(item.getIdentifier());
-					// logString.append(" " + "NEW");
+
 					allProcess.raiseCounter();
 					Record rec = new Record();
 					rec.setOaiRecord(item);
 					rec.setMetadata(item.getMetadata());
 					rec.setOaiIdentifier(item.getIdentifier());
 
-					// logString.append(" " + item.getIdentifier());
-
 					identifier = item.getIdentifier().replaceAll(":", "_");
 					identifier = identifier.replaceAll("/", ".");
 					identifier = identifier.replaceAll("\\?", ".");
 
-					// File fileTest =new File(folderName + "/" + identifier
-					// + ".xml");
-					// if(fileTest.exists())
-					// System.out.println("File:"+fileTest.getName()+" exists.");
+					identifier = name + "_" + identifier;
 
-					File mtdt = new File(folderName + "/" + name + "_"
-							+ identifier + ".xml");
+					File mtdt = new File(folderName + "/" + identifier + ".xml");
 
 					if (mtdt.exists()) {
 						int fileContent = IOUtilsv2.readStringFromFile(mtdt)
@@ -113,12 +106,11 @@ public class Worker implements Runnable {
 						allProcess.raiseNew();
 					}
 
-					logString.append(" " + item.getIdentifier());
+					logString.append(" " + identifier);
 					try {
 						IOUtilsv2.writeStringToFileInEncodingUTF8(
 								OaiUtils.parseLom2Xmlstring(metadata),
-								folderName + "/" + name + "_" + identifier
-										+ ".xml");
+								folderName + "/" + identifier + ".xml");
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -127,14 +119,22 @@ public class Worker implements Runnable {
 				} else {
 
 					logString.append(" " + "DELETED");
-					logString.append(" " + name + "_" + identifier);
+					identifier = item.getIdentifier().replaceAll(":", "_");
+					identifier = identifier.replaceAll("/", ".");
+					identifier = identifier.replaceAll("\\?", ".");
+					identifier = name + "_" + identifier;
+					logString.append(" " + identifier);
 					allProcess.raiseDeleted();
 
 				}
 			} else {
 
 				logString.append(" " + "DELETED");
-				logString.append(" " + name + "_" + identifier);
+				identifier = item.getIdentifier().replaceAll(":", "_");
+				identifier = identifier.replaceAll("/", ".");
+				identifier = identifier.replaceAll("\\?", ".");
+				identifier = name + "_" + identifier;
+				logString.append(" " + identifier);
 				allProcess.raiseDeleted();
 
 			}
@@ -148,11 +148,7 @@ public class Worker implements Runnable {
 
 			channel.basicPublish("", this.queue, null, logString.toString()
 					.getBytes());
-			/*
-			 * System.out.println(" Sent '" + logString.toString() +
-			 * "' to message queue server at:" +
-			 * connection.getAddress().getHostAddress());
-			 */
+
 			channel.close();
 			connection.close();
 
