@@ -89,7 +89,8 @@ public class Worker implements Runnable {
 					// if(fileTest.exists())
 					// System.out.println("File:"+fileTest.getName()+" exists.");
 
-					File mtdt = new File(folderName + "/" + identifier + ".xml");
+					File mtdt = new File(folderName + "/" + name + "_"
+							+ identifier + ".xml");
 
 					if (mtdt.exists()) {
 						int fileContent = IOUtilsv2.readStringFromFile(mtdt)
@@ -116,7 +117,8 @@ public class Worker implements Runnable {
 					try {
 						IOUtilsv2.writeStringToFileInEncodingUTF8(
 								OaiUtils.parseLom2Xmlstring(metadata),
-								folderName + "/" + identifier + ".xml");
+								folderName + "/" + name + "_" + identifier
+										+ ".xml");
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -125,14 +127,14 @@ public class Worker implements Runnable {
 				} else {
 
 					logString.append(" " + "DELETED");
-					logString.append(" " + item.getIdentifier());
+					logString.append(" " + name + "_" + identifier);
 					allProcess.raiseDeleted();
 
 				}
 			} else {
 
 				logString.append(" " + "DELETED");
-				logString.append(" " + item.getIdentifier());
+				logString.append(" " + name + "_" + identifier);
 				allProcess.raiseDeleted();
 
 			}
@@ -140,8 +142,6 @@ public class Worker implements Runnable {
 
 			// sending to message queue
 
-			
-			
 			Connection connection = this.factory.newConnection();
 			Channel channel = connection.createChannel();
 			channel.queueDeclare(this.queue, false, false, false, null);
