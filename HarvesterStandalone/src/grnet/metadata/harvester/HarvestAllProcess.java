@@ -25,8 +25,7 @@ import uiuc.oai.OAIRepository;
 import com.rabbitmq.client.ConnectionFactory;
 
 public class HarvestAllProcess {
-	private static final Logger slf4jLogger = LoggerFactory
-			.getLogger(HarvestAllProcess.class);
+	private static final Logger slf4jLogger = LoggerFactory.getLogger(HarvestAllProcess.class);
 	private int counter = 0;
 	private int deleted = 0;
 	private int updated = 0;
@@ -35,12 +34,12 @@ public class HarvestAllProcess {
 
 	private final static String QUEUE_NAME = "harvesting";
 
-	public static void main(String[] args) throws OAIException, IOException,
-			JDOMException, ParseException, InterruptedException {
+	public static void main(String[] args)
+			throws OAIException, IOException, JDOMException, ParseException, InterruptedException {
 
 		if (args.length != 4) {
-			System.err
-					.println("Usage: java HarvestProcess param1(target) param2(foldername) param3(metadataPrefix) param4(set), e.g");
+			System.err.println(
+					"Usage: java HarvestProcess param1(target) param2(foldername) param3(metadataPrefix) param4(set), e.g");
 			System.exit(1);
 		}
 		// else{ throw new IOException("ERRROR");}
@@ -90,9 +89,8 @@ public class HarvestAllProcess {
 		return deleted;
 	}
 
-	public void listRecords(String target, String folderName,
-			String metadataPrefix, String set) throws OAIException,
-			IOException, JDOMException, ParseException, InterruptedException {
+	public void listRecords(String target, String folderName, String metadataPrefix, String set)
+			throws OAIException, IOException, JDOMException, ParseException, InterruptedException {
 		OAIRepository repos = null;
 		// try {
 		Properties props = new Properties();
@@ -117,11 +115,9 @@ public class HarvestAllProcess {
 
 		SimpleDateFormat dateFormat = null;
 
-		dateFormat = new SimpleDateFormat(
-				props.getProperty(Constants.granularity));
+		dateFormat = new SimpleDateFormat(props.getProperty(Constants.granularity));
 
-		System.out.println("Harvester Dateformat:"
-				+ dateFormat.toLocalizedPattern());
+		System.out.println("Harvester Dateformat:" + dateFormat.toLocalizedPattern());
 		System.out.println("Max retry limit:" + repos.getRetryLimit());
 
 		OAIRecordList records;
@@ -151,8 +147,7 @@ public class HarvestAllProcess {
 		String date = dateFormat.format(new Date());
 
 		System.out.println("Harvesting date:" + date);
-		System.out
-				.println("Harvesting repository:" + repos.getRepositoryName());
+		System.out.println("Harvesting repository:" + repos.getRepositoryName());
 
 		if (set.equals("")) {
 
@@ -165,7 +160,9 @@ public class HarvestAllProcess {
 		else {
 			System.out.println("Set:" + set);
 			System.out.println("From:" + from);
-			records = repos.listRecords(metadataPrefix, to, from, set);
+			//records = repos.listRecords(metadataPrefix, to, from, set);
+			
+			records=repos.listRecords(metadataPrefix, "", "", set);
 		}
 
 		int threadPoolSize = 1;
@@ -174,20 +171,25 @@ public class HarvestAllProcess {
 		System.out.println("Available cores:" + availableProcessors);
 		System.out.println("Thread Pool size:" + threadPoolSize);
 		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-	
+
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(props.getProperty(Constants.queueHost));
 		factory.setUsername(props.getProperty(Constants.queueUser));
 		factory.setPassword(props.getProperty(Constants.queuePass));
-		
+
 		long start = System.currentTimeMillis();
+
+		if (records.getCompleteSize() == 0) {
+			System.err.println("No records available.");
+			System.exit(-1);
+		}
 
 		while (records.moreItems()) {
 
 			OAIRecord item = records.getCurrentItem();
 
-			Worker worker = new Worker(file.getName(), IP, metadataPrefix,
-					item, slf4jLogger, this, folderName, factory, QUEUE_NAME);
+			Worker worker = new Worker(file.getName(), IP, metadataPrefix, item, slf4jLogger, this, folderName, factory,
+					QUEUE_NAME);
 			executor.execute(worker);
 
 			records.moveNext();
