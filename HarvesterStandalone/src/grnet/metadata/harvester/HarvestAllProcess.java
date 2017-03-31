@@ -22,8 +22,6 @@ import uiuc.oai.OAIRecord;
 import uiuc.oai.OAIRecordList;
 import uiuc.oai.OAIRepository;
 
-import com.rabbitmq.client.ConnectionFactory;
-
 public class HarvestAllProcess {
 	private static final Logger slf4jLogger = LoggerFactory.getLogger(HarvestAllProcess.class);
 	private int counter = 0;
@@ -160,9 +158,9 @@ public class HarvestAllProcess {
 		else {
 			System.out.println("Set:" + set);
 			System.out.println("From:" + from);
-			//records = repos.listRecords(metadataPrefix, to, from, set);
-			
-			records=repos.listRecords(metadataPrefix, "", "", set);
+			// records = repos.listRecords(metadataPrefix, to, from, set);
+
+			records = repos.listRecords(metadataPrefix, "", "", set);
 		}
 
 		int threadPoolSize = 1;
@@ -171,11 +169,6 @@ public class HarvestAllProcess {
 		System.out.println("Available cores:" + availableProcessors);
 		System.out.println("Thread Pool size:" + threadPoolSize);
 		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-
-		ConnectionFactory factory = new ConnectionFactory();
-		factory.setHost(props.getProperty(Constants.queueHost));
-		factory.setUsername(props.getProperty(Constants.queueUser));
-		factory.setPassword(props.getProperty(Constants.queuePass));
 
 		long start = System.currentTimeMillis();
 
@@ -188,7 +181,7 @@ public class HarvestAllProcess {
 
 			OAIRecord item = records.getCurrentItem();
 
-			Worker worker = new Worker(file.getName(), IP, metadataPrefix, item, slf4jLogger, this, folderName, factory,
+			Worker worker = new Worker(file.getName(), IP, metadataPrefix, item, slf4jLogger, this, folderName,
 					QUEUE_NAME);
 			executor.execute(worker);
 

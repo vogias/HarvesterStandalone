@@ -11,10 +11,6 @@ import org.ariadne.util.OaiUtils;
 import org.jdom.Element;
 import org.slf4j.Logger;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-
 import uiuc.oai.OAIException;
 import uiuc.oai.OAIRecord;
 
@@ -28,12 +24,10 @@ public class Worker implements Runnable {
 	OAIRecord item;
 	Logger slf4jLogger;
 	HarvestAllProcess allProcess;
-	ConnectionFactory factory;
 	String queue;
 
-	public Worker(String name, String IP, String metadataPrefix,
-			OAIRecord item, Logger slf4jLogger, HarvestAllProcess allProcess,
-			String folderName, ConnectionFactory factory, String queueName) {
+	public Worker(String name, String IP, String metadataPrefix, OAIRecord item, Logger slf4jLogger,
+			HarvestAllProcess allProcess, String folderName, String queueName) {
 
 		this.name = name;
 		this.IP = IP;
@@ -42,7 +36,6 @@ public class Worker implements Runnable {
 		this.slf4jLogger = slf4jLogger;
 		this.folderName = folderName;
 		this.allProcess = allProcess;
-		this.factory = factory;
 		this.queue = queueName;
 	}
 
@@ -86,11 +79,9 @@ public class Worker implements Runnable {
 					File mtdt = new File(folderName + "/" + identifier + ".xml");
 
 					if (mtdt.exists()) {
-						int fileContent = IOUtilsv2.readStringFromFile(mtdt)
-								.hashCode();
+						int fileContent = IOUtilsv2.readStringFromFile(mtdt).hashCode();
 
-						int text = OaiUtils.parseLom2Xmlstring(metadata)
-								.hashCode();
+						int text = OaiUtils.parseLom2Xmlstring(metadata).hashCode();
 
 						if (fileContent != text) {
 							logString.append(" " + "UPDATED");
@@ -108,8 +99,7 @@ public class Worker implements Runnable {
 
 					logString.append(" " + identifier);
 					try {
-						IOUtilsv2.writeStringToFileInEncodingUTF8(
-								OaiUtils.parseLom2Xmlstring(metadata),
+						IOUtilsv2.writeStringToFileInEncodingUTF8(OaiUtils.parseLom2Xmlstring(metadata),
 								folderName + "/" + identifier + ".xml");
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -140,27 +130,9 @@ public class Worker implements Runnable {
 			}
 			slf4jLogger.info(logString.toString());
 
-			// sending to message queue
-
-			Connection connection = this.factory.newConnection();
-			Channel channel = connection.createChannel();
-			channel.queueDeclare(this.queue, false, false, false, null);
-
-			channel.basicPublish("", this.queue, null, logString.toString()
-					.getBytes());
-
-			channel.close();
-			connection.close();
-
 		} catch (OAIException e1) {
-			System.err
-					.println("Harvesting from "
-							+ name
-							+ " did not complete because of a harvesting error, the error was : "
-							+ e1.getMessage());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("Harvesting from " + name
+					+ " did not complete because of a harvesting error, the error was : " + e1.getMessage());
 		}
 
 	}
